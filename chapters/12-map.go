@@ -1,67 +1,53 @@
 package main
+import "fmt"
+import "strings"
+import "strconv"
 
-import (
-	"fmt"
-	"strings"
-)
-
-const conferenceTickets int = 50
-
-var remainingTickets uint = 50
 var conferenceName = "Go Conference"
-var bookings = make([]User, 0)
+const conferenceTickets int = 50
+var remainingTickets uint = 50
+var bookings = make([]map[string]string, 0)
 
-type User struct {
-	firstName       string
-	lastName        string
-	email           string
-	numberOfTickets uint
-}
-
-func main() {
-
+func main(){
 	greetUsers()
-
-	for {
-
+	for{
 		firstName, lastName, email, userTickets := getUserInput()
-		isValidName, isValidEmail, isValidTicketNumber := validateUserInput(firstName, lastName, email, userTickets)
+		isValidName, isValidEmail, isValidTicketNumber := validateUserInput(firstName, lastName, email, userTickets, remainingTickets)
 
 		if isValidName && isValidEmail && isValidTicketNumber {
-
 			bookTicket(userTickets, firstName, lastName, email)
-
 			firstNames := printFirstNames()
 			fmt.Printf("The first names %v\n", firstNames)
 
 			if remainingTickets == 0 {
+				fmt.Println("Our conference is booked out. Come back next year.")
 				break
 			}
-		} else {
+		}else{
 			if !isValidName {
-				fmt.Println("firt name or last name you entered is too short")
+				fmt.Println("First name or last name you entered is too short.")
 			}
 			if !isValidEmail {
-				fmt.Println("email address you entered doesn't contain @ sign")
+				fmt.Println("Email address you entered doesn't contain @ sign.")
 			}
 			if !isValidTicketNumber {
-				fmt.Println("number of tickets you entered is invalid")
+				fmt.Println("Number of tickets you entered is invalid.")
 			}
 			continue
 		}
 	}
 }
 
-func printFirstNames() []string {
-	firstNames := []string{}
 
+func printFirstNames()[]string{
+	firstNames := []string{}
 	for _, booking := range bookings {
-		firstNames = append(firstNames, booking.firstName)
+		firstNames = append(firstNames, booking["firstName"])
 	}
 	return firstNames
 }
 
-func getUserInput() (string, string, string, uint) {
+func getUserInput() (string, string, string, uint){
 	var firstName string
 	var lastName string
 	var email string
@@ -69,39 +55,37 @@ func getUserInput() (string, string, string, uint) {
 
 	fmt.Println("Enter Your First Name: ")
 	fmt.Scanln(&firstName)
-
 	fmt.Println("Enter Your Last Name: ")
 	fmt.Scanln(&lastName)
-
 	fmt.Println("Enter Your Email: ")
 	fmt.Scanln(&email)
-
 	fmt.Println("Enter number of tickets: ")
 	fmt.Scanln(&userTickets)
 
 	return firstName, lastName, email, userTickets
 }
 
-func validateUserInput(firstName string, lastName string, email string, userTickets uint) (bool, bool, bool) {
+func validateUserInput(firstName string, lastName string, email string, userTickets uint, remainingTickets uint) (bool, bool, bool){
 	isValidName := len(firstName) >= 2 && len(lastName) >= 2
 	isValidEmail := strings.Contains(email, "@")
 	isValidTicketNumber := userTickets > 0 && userTickets <= remainingTickets
 	return isValidName, isValidEmail, isValidTicketNumber
 }
 
-func greetUsers() {
-	fmt.Printf("Welcome to %v booking application.\nWe have total of %v tickets and %v are still available.\nGet your tickets here to attend\n", conferenceName, conferenceTickets, remainingTickets)
+func greetUsers(){
+	fmt.Printf("Welcome to %v booking application\n", conferenceName)
+	fmt.Printf("We have total of %v tickets and %v are still available.\n", conferenceTickets, remainingTickets)
+	fmt.Println("Get your tickets here to attend")
 }
 
 func bookTicket(userTickets uint, firstName string, lastName string, email string) {
-	remainingTickets = remainingTickets - userTickets
 
-	var user = User{
-		firstName:       firstName,
-		lastName:        lastName,
-		email:           email,
-		numberOfTickets: userTickets,
-	}
+	remainingTickets = remainingTickets - userTickets
+	var user = make(map[string]string)
+	user["firstName"] = firstName
+	user["lastName"] = lastName
+	user["email"] = email
+	user["numberOfTickets"] = strconv.FormatUint(uint64(userTickets), 10)
 
 	bookings = append(bookings, user)
 
